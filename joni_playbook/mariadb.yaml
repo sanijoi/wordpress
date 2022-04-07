@@ -1,0 +1,77 @@
+---
+- name: install and set up Mariadb and Mysql
+  hosts: group1
+  gather_facts: yes
+  tasks:
+    - name: yum  update
+      yum:
+        name: "*"
+        state : latest
+      when: ansible_distribution == "CentOS"    
+        
+    - name: copy mariadb repo to CentOS host
+      copy:
+        src: /root/git-repos/wordpress/joni_playbook/MariaDB.repo
+        dest: /etc/yum.repos.d/MariaDB.repo
+        remote_src: no
+      when: ansible_distribution == "CentOS"  
+
+    - name: install mariadb CentOS
+      yum: 
+        name: mariadb-server 
+        state: latest
+      when: ansible_distribution == "CentOS"  
+      
+    - name: apt update
+      apt:
+        name: "*"
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install common
+      apt:
+        name: software-properties-common
+      when: ansible_pkg_mgr == "apt"  
+
+    - name:  MariaDB repository 10.4
+      apt_repository:
+        repo: 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/10.3/ubuntu xenial main'
+        state: present 
+      when: ansible_distribution == "Ubuntu"
+
+    - name: add repository key to the system
+      apt_key: 
+        keyserver: hkp://keyserver.ubuntu.com:80
+        id: '0xF1656F24C74CD1D8'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: apt update
+      apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"  
+
+    - name: install Mariadb 10.4 with all dependency
+      apt:
+        name:
+          - mariadb-server
+          - mariadb-client
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: start matiadb server
+      systemd:
+        name: mariadb 
+        state: started
+        enabled: yes
+      register: mariadb_status
+      
+    - name: check satus of mariadb in both servers
+      debug:
+        msg: "{{ mariadb_status.status.ActiveState }}"
+
+    - name: restart marialdb in both servers
+      service:
+        name: mysql
+        state: restarted    

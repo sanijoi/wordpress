@@ -1,0 +1,16 @@
+---
+- name: Mysql secure installation
+  hosts: group1
+  gather_facts: yes
+  tasks:
+    - name: update apt
+      apt:
+        name: "*"
+        state: latest
+      when: ansible_pkg_mgr == 'apt'  
+
+    - name:
+      apt:
+        name: mysql-python
+        state: present
+      when: ansible_pkg_mgr == 'apt'

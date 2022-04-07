@@ -1,0 +1,17 @@
+---
+all:
+  hosts:
+  children:
+    group1: # backend
+      hosts:
+        host1: # Ubuntu
+          ansible_host: 10.108.0.8
+        host2: # CentOS
+          ansible_host: 10.108.0.11
+
+    group2:  # frontend
+      hosts:
+        web1:
+          ansible_host: 10.108.0.10
+        web2:
+          ansible_host: 10.108.0.4

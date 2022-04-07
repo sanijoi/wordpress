@@ -1,0 +1,188 @@
+---
+- name: install apache to all server
+  hosts: group2
+  gather_facts: yes
+  tasks:
+    - name: apt update
+      apt: 
+        name: "*"
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+    
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: dist
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install apache to ubuntu
+      apt: 
+        name: apache2
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: start service apache2, if it's not started
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Run the equivalent of "apt-get update"
+      apt: 
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install software-properties-common
+      apt:
+        name: software-properties-common
+      when: ansible_distribution == "Ubuntu"  
+    
+    - name: repo php 7.4
+      apt_repository:
+        repo: "ppa:ondrej/php"
+      when: ansible_distribution == "Ubuntu"  
+   
+    - name: install php '7.4' of package "php"  
+      apt:
+        name:
+          - php7.4
+          - php7.4-mysql
+          - php7.4-curl
+        state: present
+      when: ansible_distribution == "Ubuntu"  
+
+    - name: installand wget to ubuntu
+      apt: 
+        name: 
+          - wget
+          - unzip
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install wordpess to ubuntu
+      get_url: 
+        url: https://wordpress.org/latest.zip
+        dest: /root/latest.zip
+        mode: '755'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: move zip to html
+      unarchive:
+        src: /root/latest.zip
+        dest: /root/
+        remote_src: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: 
+      copy:
+        src: /root/wordpress/
+        dest: /var/www/html/
+        remote_src: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: chown html from root user to apahe user
+      file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '755'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install apache to CentOS
+      yum: 
+        name: httpd
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: start apache on CentOS
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: install epel-relese
+      yum:
+        name: epel-release
+        state: latest
+      when: ansible_distribution == "CentOS"
+    
+    - name: install php rpm to CentOS 
+      yum:
+        name: 
+          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+          - https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: install yum-utils and unzip
+      yum:
+        name:
+          - yum-utils
+          - unzip
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: eanble repo
+      command: yum-config-manager --enable remi-php74
+      when: ansible_distribution == "CentOS"
+
+
+    - name: yum update
+      yum:
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: install php 
+      yum: 
+        name: 
+          - php
+          - php-cli
+          - php-fpm 
+          - php-mysqlnd 
+          - php-zip 
+          - php-devel 
+          - php-gd 
+          - php-mcrypt
+          - php-mbstring 
+          - php-curl 
+          - php-xml 
+          - php-pear
+          - php-bcmath 
+          - php-json
+        state: latest
+      when: ansible_distribution == "CentOS"
+   
+    - name: install wordpess to CentOS 
+      get_url: 
+        url: https://wordpress.org/latest.zip
+        dest: /root/latest.zip
+        mode: '755'
+      when: ansible_distribution == "CentOS"
+
+    - name: move zip to html
+      unarchive:
+        src: /root/latest.zip
+        dest: /root/
+        remote_src: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: 
+      copy:
+        src: /root/wordpress/
+        dest: /var/www/html/
+        remote_src: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: chown html from root user to apahe user
+      file:
+        path: /var/www/html
+        state: directory
+        owner: apache
+        group: apache
+        mode: '755'
+      when: ansible_distribution == "CentOS"
+
+    - name: reboot all servers
+      reboot:
