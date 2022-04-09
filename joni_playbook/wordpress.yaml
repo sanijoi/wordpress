@@ -27,6 +27,13 @@
         enabled: yes
       when: ansible_distribution == "Ubuntu"
 
+    - name: Allow all access to 
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+      when: ansible_distribution == "Ubuntu"
+
     - name: Run the equivalent of "apt-get update"
       apt: 
         update_cache: yes
